@@ -7,9 +7,10 @@ class PyColor():
     # Required Import for time logging
     from datetime import datetime
 
-    def __init__(self, color=True):
-        # Make Color accessable outside __init__ scope
+    def __init__(self, color=True, default="^WHT"):
+        # Make vars accessable outside __init__ scope
         self.color = color
+        self.defaultColor = default
 
         # Determine Correct Colorisation Method for the platform
         if self.color:
@@ -66,19 +67,25 @@ class PyColor():
         '''
 
         if not self.color or self.colorMode == "ANSI":
+            # Format initial text
+            text = self.defaultColor + self.datetime.now().strftime("%H:%M:%S") + " | " + text
+
             # Add Color Reset at EOS to prevent color overflow
-            text += "^WHT"
+            text += self.defaultColor
 
             # Replace Color Key with ANSI Value or none for no color
             for k, vANSI, vWin in self.colors:
                 text = text.replace(k, (vANSI if self.color else ""))
 
             # Print text to Console
-            print(self.datetime.now().strftime("%H:%M:%S") + " | " + text)
+            print(text)
         elif self.colorMode == "Windows":
             # Set stdoutHandle and setColor
             stdoutHandle = self.windll.kernel32.GetStdHandle(-11)
             setColor = self.windll.kernel32.SetConsoleTextAttribute
+
+            # Set Color to Default
+            setColor(stdoutHandle, self.colors[[x[0] for x in self.colors].index(self.defaultColor)][2])
 
             # Print initial log
             print(self.datetime.now().strftime("%H:%M:%S") + " | ", end="")
@@ -111,9 +118,6 @@ class PyColor():
             # Print the remaining text
             print(text)
             self.stdout.flush()
-
-            # Set Color to Default
-            setColor(stdoutHandle, self.colors[6][2])
 # End PyColor Class
 
 
