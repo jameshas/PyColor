@@ -4,7 +4,7 @@ class PyColor():
         print: Print text to console
     '''
 
-    # Required Import
+    # Required Import for time logging
     from datetime import datetime
 
     def __init__(self, color=True):
@@ -13,6 +13,7 @@ class PyColor():
 
         # Determine Correct Colorisation Method for the platform
         if self.color:
+            # Imports required for platform detection
             from os import name
             from platform import release, version
 
@@ -65,6 +66,9 @@ class PyColor():
         '''
 
         if not self.color or self.colorMode == "ANSI":
+            # Add Color Reset at EOS to prevent color overflow
+            text += "^WHT"
+
             # Replace Color Key with ANSI Value or none for no color
             for k, vANSI, vWin in self.colors:
                 text = text.replace(k, (vANSI if self.color else ""))
@@ -110,10 +114,10 @@ class PyColor():
 
             # Set Color to Default
             setColor(stdoutHandle, self.colors[6][2])
-# End Log Class
+# End PyColor Class
 
 
-# Logging
+# Example Logging
 Log = PyColor()
 
 Log.print("^BRED-- ^REDExample error string in red.")
