@@ -93,8 +93,7 @@ class PyColor():
 
             # Loop through string searching for color markup
             searchKey = self.compile("(?P<colorTag>\\{})".format("|\\".join([x[0] for x in self.colors])))
-            subCol = True
-            while subCol:
+            while True:
                 # Match First Instance of Color Markup in text
                 subCol = searchKey.search(text)
 
@@ -114,6 +113,8 @@ class PyColor():
 
                     # Remove subString from text and Continue
                     text = text[subCol.end():]
+                else:
+                    break
 
             # Print the remaining text
             print(text)
