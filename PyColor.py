@@ -4,9 +4,6 @@ class PyColor():
         print: Print text to console
     '''
 
-    # Required Import for time logging
-    from datetime import datetime
-
     def __init__(self, color=True, default="^WHT"):
         # Make vars accessable outside __init__ scope
         self.color = color
@@ -48,14 +45,14 @@ class PyColor():
             ("^PUR", "\033[0;35m", 5),      # Purple (Magenta)
             ("^YEL", "\033[0;33m", 6),      # Yellow
             ("^WHT", "\033[0;37m", 7),      # White (Standard)
+            ("^GRY", "\033[0;37;2m", 8),    # Grey
             ("^BBLU", "\033[0;34;1m", 9),   # BRIGHT Blue
             ("^BGRN", "\033[0;32;1m", 10),  # BRIGHT Green
             ("^BCYN", "\033[0;36;1m", 11),  # BRIGHT Cyan
             ("^BRED", "\033[0;31;1m", 12),  # BRIGHT Red
             ("^BPUR", "\033[0;35;1m", 13),  # BRIGHT Purple (Magenta)
             ("^BYEL", "\033[0;33;1m", 14),  # BRIGHT Yellow
-            ("^BWHT", "\033[0;37;1m", 15),  # BRIGHT White
-            ("^GRY", "\033[0;37;2m", 8)     # Grey
+            ("^BWHT", "\033[0;37;1m", 15)   # BRIGHT White
         )
 
     def print(self, text):
@@ -66,12 +63,12 @@ class PyColor():
             None
         '''
 
-        if not self.color or self.colorMode == "ANSI":
-            # Format initial text
-            text = self.defaultColor + self.datetime.now().strftime("%H:%M:%S") + " | " + text
+        # Stringify Input
+        text = str(text)
 
-            # Add Color Reset at EOS to prevent color overflow
-            text += self.defaultColor
+        if not self.color or self.colorMode == "ANSI":
+            # Wrap text with the default color
+            text = self.defaultColor + text + self.defaultColor
 
             # Replace Color Key with ANSI Value or none for no color
             for k, vANSI, vWin in self.colors:
@@ -82,14 +79,10 @@ class PyColor():
         elif self.colorMode == "Windows":
             # Set stdoutHandle and setColor
             stdoutHandle = self.windll.kernel32.GetStdHandle(-11)
-            setColor = self.windll.kernel32.SetConsoleTextAttribute
+            setColor = lambda x: self.windll.kernel32.SetConsoleTextAttribute(stdoutHandle, x)
 
             # Set Color to Default
-            setColor(stdoutHandle, self.colors[[x[0] for x in self.colors].index(self.defaultColor)][2])
-
-            # Print initial log
-            print(self.datetime.now().strftime("%H:%M:%S") + " | ", end="")
-            self.stdout.flush()
+            setColor(self.colors[[x[0] for x in self.colors].index(self.defaultColor)][2])
 
             # Loop through string searching for color markup
             searchKey = self.compile("(?P<colorTag>\\{})".format("|\\".join([x[0] for x in self.colors])))
@@ -109,7 +102,7 @@ class PyColor():
 
                     # Set Console color to subColor Found
                     subColor = subCol.group('colorTag')
-                    setColor(stdoutHandle, self.colors[[x[0] for x in self.colors].index(subColor)][2])
+                    setColor(self.colors[[x[0] for x in self.colors].index(subColor)][2])
 
                     # Remove subString from text and Continue
                     text = text[subCol.end():]
@@ -122,11 +115,8 @@ class PyColor():
 # End PyColor Class
 
 
-# Example Logging
-Log = PyColor()
+# Example Usage
+Colorful = PyColor()
 
-Log.print("^BRED-- ^REDExample error string in red.")
-Log.print("^BGRN++ ^GRNExample success string in green.")
-Log.print("^WHT[] ^GRYExample info string in grey.")
-Log.print("All Colours: ^BLUBlue, ^GRNGreen, ^CYNCyan, ^REDRed, ^PURPurple, ^YELYellow, ^WHTWhite, ^GRYGrey")
-Log.print("All Colours: ^BBLUBlue, ^BGRNGreen, ^BCYNCyan, ^BREDRed, ^BPURPurple, ^BYELYellow, ^BWHTWhite ^WHT(Bright)")
+Colorful.print("All Colours: ^BLUBlue, ^GRNGreen, ^CYNCyan, ^REDRed, ^PURPurple, ^YELYellow, ^WHTWhite, ^GRYGrey")
+Colorful.print("All Colours: ^BBLUBlue, ^BGRNGreen, ^BCYNCyan, ^BREDRed, ^BPURPurple, ^BYELYellow, ^BWHTWhite ^WHT(Bright)")
